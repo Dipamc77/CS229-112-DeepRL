@@ -27,7 +27,6 @@ def main():
     parser.add_argument("--max_timesteps", type=int)
     parser.add_argument('--num_rollouts', type=int, default=20,
                         help='Number of expert roll outs')
-    parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--total_steps', type=int, default=20000)
     args = parser.parse_args()
 
@@ -43,18 +42,20 @@ def main():
         max_steps = args.max_timesteps or env.spec.timestep_limit
 
         returns = []
-        observations = []
-        actions = []
+        all_obs = []
+        all_acs = []
         for i in range(args.num_rollouts):
             print('iter', i)
             obs = env.reset()
             done = False
             totalr = 0.
             steps = 0
+            observations = []
+            actions = []
             while not done:
                 action = policy_fn(obs[None,:])
                 observations.append(obs)
-                actions.append(action)
+                actions.append(np.squeeze(action))
                 obs, r, done, _ = env.step(action)
                 totalr += r
                 steps += 1
@@ -64,20 +65,21 @@ def main():
                 if steps >= max_steps:
                     break
             returns.append(totalr)
+            all_obs.append(np.array(observations))
+            all_acs.append(np.array(actions))
+            total_steps += steps
             if total_steps >= args.total_steps:
                 break
-            else:
-                total_steps += steps
             
         print('returns', returns)
         print('mean return', np.mean(returns))
         print('std of return', np.std(returns))
 
-        expert_data = {'observations': np.array(observations),
-                       'actions': np.array(actions),
-                       'returns': np.array(returns)}
+        expert_data = {'observations': all_obs,
+                       'actions': all_acs,
+                       'returns': returns}
 
-        with open(os.path.join('expert_data/', args.envname + '_seed_' + str(args.seed) +'.pkl'), 'wb') as f:
+        with open(os.path.join('expert_data/', args.envname +'_data.pkl'), 'wb') as f:
             print(f)
             pickle.dump(expert_data, f, pickle.HIGHEST_PROTOCOL)
 

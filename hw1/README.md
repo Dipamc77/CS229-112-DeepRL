@@ -46,6 +46,8 @@ The result plots are stored in folder ```results/``` The ```.pkl``` files contai
 
 Experiments were done with 2, 5 and 20 rollouts taken from expert as the training set for behavior cloning. For DAgger, the initial training sets were taken from 1, 2 and 5 expert rollouts.
 
+![Imitation Learning Results](https://github.com/Dipamc77/CS229-112-DeepRL/blob/master/hw1/results/all_results.png)
+
 In some of the environments, Behavior Cloning is able to achieve nearly equal rewards to the expert policy. Whereas in some environments only DAgger is able to get optimal rewards. Behavior cloning especially fails with environments like Humanoid-v2 which terminate when the human starts falling, which is out of the training distribution as expert policy doesn't fall.
 
 Using L2 Regularization and Batch Normalization seem to be a mixed bag. For some environments batchnorm helps DAgger speed up training, whereas in other case it slows down training. L2 Regularization seems to hinder behavior cloning in most cases, but can help training for the case of higher number of exoert rollouts are part of the training set. More thorough tuning of the parameters may be required.
